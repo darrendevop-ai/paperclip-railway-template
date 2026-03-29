@@ -23,7 +23,8 @@ RUN npm install -g @google/gemini-cli
 COPY . .
 
 # Give ownership to non-root user
-RUN chown -R paperclip:paperclip /app /home/paperclip
+RUN mkdir -p /home/paperclip/.gemini && \
+    chown -R paperclip:paperclip /app /home/paperclip
 
 # Copy and set up entrypoint
 COPY entrypoint.sh /entrypoint.sh
