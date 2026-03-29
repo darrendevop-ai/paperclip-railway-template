@@ -1,12 +1,13 @@
 FROM node:20-slim
 
-# Install gosu for privilege dropping in entrypoint
-RUN apt-get update && apt-get install -y --no-install-recommends gosu && rm -rf /var/lib/apt/lists/*
+# Install gosu and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gosu curl gnupg && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user (required: Claude CLI refuses --dangerously-skip-permissions as root)
+# Create a non-root user
 RUN groupadd -r paperclip && useradd -r -g paperclip -m -d /home/paperclip -s /bin/bash paperclip
 
-# Create the paperclip home directory (Railway volume mount point)
+# Create the paperclip home directory
 RUN mkdir -p /paperclip && chown -R paperclip:paperclip /paperclip
 
 WORKDIR /app
@@ -15,20 +16,23 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install --omit=dev
 
+# Install Gemini CLI globally
+RUN npm install -g @google/gemini-cli
+
 # Copy application code
 COPY . .
 
-# Give ownership of everything to the non-root user
+# Give ownership to non-root user
 RUN chown -R paperclip:paperclip /app /home/paperclip
 
-# Copy and set up entrypoint (fixes volume mount ownership at runtime)
+# Copy and set up entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Railway injects PORT at runtime (default 3100)
+# Set Gemini API key
+ENV GEMINI_API_KEY=""
 ENV PORT=3100
 EXPOSE 3100
 
-# Entrypoint runs as root to fix volume permissions, then drops to paperclip user
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "start"]
