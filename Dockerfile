@@ -27,6 +27,7 @@ RUN mkdir -p /home/paperclip/.gemini && \
     chown -R paperclip:paperclip /app /home/paperclip
 
 # Copy and set up entrypoint
+RUN sed -i 's/\r//' /entrypoint.sh
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
