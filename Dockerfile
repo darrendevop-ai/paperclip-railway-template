@@ -27,7 +27,6 @@ RUN mkdir -p /home/paperclip/.gemini && \
     chown -R paperclip:paperclip /app /home/paperclip
 
 # Copy and set up entrypoint
-RUN sed -i 's/\r//' /entrypoint.sh
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
@@ -36,5 +35,6 @@ ENV GEMINI_API_KEY=""
 ENV PORT=3100
 EXPOSE 3100
 
+RUN sed -i 's/\r//' /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "start"]
